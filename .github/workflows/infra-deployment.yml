@@ -1,0 +1,71 @@
+name: Deploy Terraform to AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Terraform action to perform (apply or destroy)'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # TEMPORARY: Shows the OIDC claims GitHub sends. starts here
+      - name: Check GitHub OIDC claims
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken('sts.amazonaws.com')
+            const payload = JSON.parse(
+              Buffer.from(token.split('.')[1], 'base64url').toString()
+            )
+            console.log("OIDC audience:", payload.aud)
+            console.log("OIDC subject:", payload.sub)
+            console.log("Repository:", process.env.GITHUB_REPOSITORY)
+            console.log("Ref:", process.env.GITHUB_REF)
+          # OIDC diagnosti ends
+
+      - name: Configure AWS credentials from IAM Role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: |
+          if [ "${{ github.event.inputs.action }}" == "apply" ]; then
+            terraform plan -out=tfplan
+          elif [ "${{ github.event.inputs.action }}" == "destroy" ]; then
+            terraform plan -destroy -out=tfplan
+          else
+            echo "Invalid action: ${{ github.event.inputs.action }}"
+            exit 1
+          fi
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan

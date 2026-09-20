@@ -21,6 +21,6 @@ variable "node_role_arn" {
 
 variable "node_instance_types" {
   type        = list(string)
-  default     = ["t3.medium"]
+  default     = ["t3.micro"]
   description = "EC2 instance types for the EKS worker nodes"
 }

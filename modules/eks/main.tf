@@ -22,6 +22,7 @@ resource "aws_launch_template" "eks_worker" {
 resource "aws_eks_cluster" "cliff_eks" {
   name     = var.cluster_name
   role_arn = var.cluster_role_arn
+  bootstrap_self_managed_addons = false
 
   vpc_config {
     subnet_ids = var.private_subnet_ids

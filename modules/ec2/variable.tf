@@ -8,6 +8,12 @@ variable "instance_type" {
   description = "EC2 instance type"
 }
 
+variable "instance_name" {
+  type        = string
+  description = "Standalone application/web server"
+  default     = "Web-server"
+}
+
 variable "subnet_id" {
   type        = string
   description = "Subnet ID for the EC2 instance"

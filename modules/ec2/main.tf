@@ -13,7 +13,7 @@ resource "aws_instance" "webserver" {
   ]
 
   tags = {
-    Name = "learn-terraform"
+    Name = var.instance_name
   }
 }
 

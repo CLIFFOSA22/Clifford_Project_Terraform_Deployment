@@ -1,4 +1,21 @@
 # =========================
+# EKS WORKER NODE LAUNCH TEMPLATE
+# =========================
+
+resource "aws_launch_template" "eks_worker" {
+  name_prefix = "eks-worker-"
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = var.node_group_name
+    }
+  }
+}
+
+
+# =========================
 # EKS CLUSTER
 # =========================
 
@@ -18,12 +35,16 @@ resource "aws_eks_cluster" "cliff_eks" {
 
 resource "aws_eks_node_group" "cliff_nodes" {
   cluster_name    = aws_eks_cluster.cliff_eks.name
-  node_group_name = "cliff-node-group"
+  node_group_name = var.node_group_name
   node_role_arn   = var.node_role_arn
 
-  subnet_ids = var.private_subnet_ids
-
+  subnet_ids     = var.private_subnet_ids
   instance_types = var.node_instance_types
+
+  launch_template {
+    id      = aws_launch_template.eks_worker.id
+    version = aws_launch_template.eks_worker.latest_version
+  }
 
   scaling_config {
     desired_size = 2

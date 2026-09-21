@@ -1,7 +1,13 @@
 variable "cluster_name" {
   type        = string
-  default     = "cliff-eks-cluster"
+  default     = "EKS-cluster"
   description = "Name of the EKS cluster"
+}
+
+variable "node_group_name" {
+  type        = string
+  default     = "EKS-worker-node"
+  description = "Name of the EKS managed node group"
 }
 
 variable "private_subnet_ids" {

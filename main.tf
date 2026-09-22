@@ -54,3 +54,11 @@ module "eks" {
     module.iam
   ]
 }
+
+# =========================
+# KMS MODULE
+# =========================
+
+module "kms" {
+  source = "./modules/kms"
+}

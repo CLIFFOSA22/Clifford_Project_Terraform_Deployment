@@ -22,7 +22,21 @@ resource "aws_launch_template" "eks_worker" {
 resource "aws_eks_cluster" "cliff_eks" {
   name     = var.cluster_name
   role_arn = var.cluster_role_arn
+
+  # Match the existing imported EKS cluster
   bootstrap_self_managed_addons = false
+
+  # =========================
+  # CLOUDWATCH LOGGING
+  # =========================
+
+  enabled_cluster_log_types = [
+    "api",
+    "audit",
+    "authenticator",
+    "controllerManager",
+    "scheduler"
+  ]
 
   vpc_config {
     subnet_ids = var.private_subnet_ids
